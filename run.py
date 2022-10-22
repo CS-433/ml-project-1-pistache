@@ -85,8 +85,8 @@ def fill_missing(x_train, x_validation, col_idx, func):
 
 def normalize(x):
     x_out = x.copy()
-    x_out = x - np.mean(x, axis=0)
-    x_out = x / np.var(x, axis=0)
+    x_out = x_out - np.mean(x_out, axis=0)
+    x_out = x_out / np.var(x_out, axis=0)
     return x_out
 
 
@@ -102,9 +102,9 @@ def pca_transform(x_raw, n=5):
     eig_values = eig_values[idx]
     eig_vectors = eig_vectors[:,idx]
 
-    x_transformed = x_raw[:, idx[:n]]
+    x_transformed = x_raw.dot(eig_vectors[idx[:, :n]])
 
-    return x_transformed, eig_values
+    return x_transformed, eig_vectors[idx[:, :n]], eig_values
 
 
 # In[59]:
@@ -120,8 +120,8 @@ def preprocess(x_train, x_validation, miss_threshold = 0.4):
     # fill missing values for column 0
     x_train, x_validation = fill_missing(x_train, x_validation, 0, find_mod)
 
-    x_train_transformed, x_train_eig_values = pca_transform(x_train, n=5)
-    x_validation_transformed, x_validation_eig_values = pca_transform(x_validation, n=5)
+    x_train_transformed, eig_vectors_train, x_train_eig_values = pca_transform(x_train, n=5)
+    x_validation_transformed = x_validation @ eig_vectors_train
     
     return x_train_transformed, x_validation_transformed, x_train_eig_values
 
