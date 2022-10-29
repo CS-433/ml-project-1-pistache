@@ -48,13 +48,10 @@ def fill_missing(x, col_idx, func):
 
 def partition_data(x, y, ids):
     xs, ys, idss = [], [], []
-    population = []
     for i in range(4):
         xs.append(x[x[:, 22] == i])
         ys.append(y[x[:, 22] == i])
         idss.append(ids[x[:, 22] == i])
-        # population.append(xs[-1].shape[0] / x.shape[0])
-    # population = np.array(population)
     return xs, ys, idss
 
 
@@ -82,14 +79,14 @@ def process_features(x, max_degree=6):
     x /= np.std(x, axis=0)
 
     # add poly
-    x_copy = x.copy()
-    for k in range(x_copy.shape[1]):
-        for j in range(k, x_copy.shape[1]):
-            new_col = x_copy[:, k] * x_copy[:, j]
-            new_col = np.reshape(new_col, (x.shape[0], -1))
-            x = np.concatenate([x, new_col], 1)
-    x = np.concatenate([x, np.sin(x_copy), np.cos(x_copy)], 1)
-    x = np.concatenate([x, x_copy ** 3, x_copy ** 4, x_copy ** 5, x_copy ** 6], 1)
+    # x_copy = x.copy()
+    # for k in range(x_copy.shape[1]):
+    #     for j in range(k, x_copy.shape[1]):
+    #         new_col = x_copy[:, k] * x_copy[:, j]
+    #         new_col = np.reshape(new_col, (x.shape[0], -1))
+    #         x = np.concatenate([x, new_col], 1)
+    # x = np.concatenate([x, np.sin(x_copy), np.cos(x_copy)], 1)
+    # x = np.concatenate([x, x_copy ** 3, x_copy ** 4, x_copy ** 5, x_copy ** 6], 1)
     return x
 
 
@@ -115,7 +112,7 @@ def build_k_indices(N, k_fold):
 
 
 def do_cross_validation(x, y, nfolds=4):
-    lambdas = np.logspace(-4, 0, 10)
+    lambdas = np.logspace(-10, -5, 40)
 
     accs = []
     losses = []
