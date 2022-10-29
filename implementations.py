@@ -7,16 +7,16 @@ def compute_gradient(y, tx, w):
 
     Args:
         y: numpy array of shape=(N, )
-        tx: numpy array of shape=(N,2)
-        w: numpy array of shape=(2, ). The vector of model parameters.
+        tx: numpy array of shape=(N,D)
+        w: numpy array of shape=(D, ). The vector of model parameters.
 
     Returns:
         An numpy array of shape (2, ) (same shape as w), containing the gradient of the loss at w.
     """
     e = y - tx.dot(w)
     N = y.shape[0]
-    g_loss = -1 / N * tx.T.dot(e)
-    return (g_loss)
+    g_loss = -1 / N * tx.T @ e
+    return g_loss
 
 
 def compute_loss(y, tx, w):
@@ -32,8 +32,7 @@ def compute_loss(y, tx, w):
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
     e = y - tx.dot(w)
-    N = y.shape[0]
-    loss = 0.5*N * e.T.dot(e)
+    loss = 0.5 * (e ** 2).mean()
     return loss
 
 
@@ -227,12 +226,12 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
     """
     # Define parameters to store w and loss
     ws = [initial_w]
-    losses = []
+    losses = [compute_loss(y, tx, initial_w)]
     w = initial_w
     for n_iter in range(max_iters):
-        loss = compute_loss(y, tx, w)
         g_loss = compute_gradient(y, tx, w)
         w = w - gamma * g_loss
+        loss = compute_loss(y, tx, w)
 
         # store w and loss
         ws.append(w)
@@ -262,22 +261,22 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
     # Define parameters to store w and loss
     batch_size = 1
     ws = [initial_w]
-    losses = []
+    losses = [compute_loss(y, tx, initial_w)]
     w = initial_w
 
     N = y.shape[0]
 
     for n_iter in range(max_iters):
         for y_, tx_ in batch_iter(y, tx, batch_size):
-            loss = compute_loss(y_, tx_, w)
             g_loss = compute_gradient(y_, tx_, w)
             w = w - gamma * g_loss
+            loss = compute_loss(y_, tx_, w)
             ws.append(w)
             losses.append(loss)
 
             print("SGD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
                 bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
-    return  ws[-1], losses[-1]
+    return ws[-1], losses[-1]
 
 
 def least_squares(y, tx):
@@ -298,9 +297,8 @@ def least_squares(y, tx):
 
     w_star = np.linalg.solve(tx.T.dot(tx), tx.T.dot(y))
     e = y - tx.dot(w_star)
-    N = y.shape[0]
-    loss_star = 0.5 / N * e.T.dot(e)
-    return (w_star, loss_star)
+    loss_star = 0.5 * (e ** 2).mean()
+    return w_star, loss_star
 
 
 def ridge_regression(y, tx, lambda_):
@@ -326,19 +324,41 @@ def ridge_regression(y, tx, lambda_):
 
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    """just to get rid of the fucking error"""
     w = initial_w
-    loss = 100
     for n_iter in range(max_iters):
         loss, w = learning_by_gradient_descent(y, tx, w, gamma)
+    loss = calculate_loss(y, tx, w)
     return w, loss
 
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """just to get rid of the fucking error"""
     w = initial_w
-    loss = 100
     for n_iter in range(max_iters):
         loss, grad = penalized_logistic_regression(y, tx, w, lambda_)
         w = w - gamma * grad
+    loss = calculate_loss(y, tx, w)
     return w, loss
+
+# ================================================================================
+
+
+def predict_simple(tx, w):
+    scores = tx @ w
+    # dist_to_negative_one = np.abs((scores + 1) ** 2)
+    # dist_to_one = np.sqrt((scores - 1) ** 2)
+    labels = np.ones_like(scores) * -1
+    # labels[dist_to_one < dist_to_negative_one] = 1
+    labels[scores > 0] = 1
+    return labels
+
+
+def predict_logistic(tx, w):
+    scores = sigmoid(tx @ w)
+    labels = np.zeros_like(scores)
+    labels[scores > 0.5] = 1
+    return labels
+
 
 
