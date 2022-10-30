@@ -3,7 +3,7 @@
 This repository contains implementations for several binary classification
 algorithms as well as a classification pipeline with the goal of
 discovering Higgs boson using the proton collision decay signatures.
-We will detect if a given signature indicates a Higgs Boson particle or a
+We will predict if a given signature indicates a Higgs Boson particle or a
 background process.
 
 ### Implemented classification algorithms
