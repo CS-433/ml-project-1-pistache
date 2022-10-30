@@ -68,8 +68,8 @@ def process_features(x, max_degree=6):
     x = fill_missing(x, col_idx=0, func=np.median)
 
     # remove other meaningless columns
-    std = np.std(x, axis=0)
-    removing_cols = np.where(std == 0)[0]
+    var = np.var(x, axis=0)
+    removing_cols = np.where(var == 0)[0]
     x = np.delete(x, removing_cols, 1)
 
     # remove potential outliers in the features
@@ -91,18 +91,18 @@ def process_features(x, max_degree=6):
     return x
 
 
-def pca_fit(x_raw, n=10):
-    cov = np.cov(x_raw.T)
-    eig_values, eig_vectors = np.linalg.eig(cov)
-
-    idx = eig_values.argsort()[::-1]
-    eig_values = eig_values[idx]
-    eig_vectors = eig_vectors[:, idx]
-
-    return eig_vectors[:, :n], eig_values[:n]
-def pca_transform(x_raw, eig_vectors, n=10):
-    x_transformed = x_raw.dot(eig_vectors)
-    return x_transformed
+# def pca_fit(x_raw, n=10):
+#     cov = np.cov(x_raw.T)
+#     eig_values, eig_vectors = np.linalg.eig(cov)
+#
+#     idx = eig_values.argsort()[::-1]
+#     eig_values = eig_values[idx]
+#     eig_vectors = eig_vectors[:, idx]
+#
+#     return eig_vectors[:, :n], eig_values[:n]
+# def pca_transform(x_raw, eig_vectors, n=10):
+#     x_transformed = x_raw.dot(eig_vectors)
+#     return x_transformed
 
 
 def remove_outliers(x):
@@ -127,8 +127,8 @@ def build_k_indices(N, k_fold):
 
 
 def do_cross_validation(x, y, nfolds=4):
-    lambdas = np.linspace(0.00005, 0.00015, 11)
-
+    # lambdas = np.linspace(0.00005, 0.00015, 11)
+    lambdas = np.logspace(-5, -3, 70)
     accs = []
     losses = []
     for lambda_ in lambdas:
