@@ -343,7 +343,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
 # ================================================================================
 
-
 def predict_simple(tx, w):
     scores = tx @ w
     # dist_to_negative_one = np.abs((scores + 1) ** 2)
@@ -359,6 +358,3 @@ def predict_logistic(tx, w):
     labels = np.zeros_like(scores)
     labels[scores > 0.5] = 1
     return labels
-
-
-
