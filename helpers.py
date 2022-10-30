@@ -40,12 +40,13 @@ def create_csv_submission(ids, y_pred, name):
             writer.writerow({"Id": int(r1), "Prediction": int(r2)})
 
 
+# This function fills the missing values using the given function
 def fill_missing(x, col_idx, func):
     replace_val = func(x[x[:, col_idx] != -999, col_idx])
     x[x[:, col_idx] == -999, col_idx] = replace_val
     return x
 
-
+# This function partitions the data based on the value of PIR_jet_num
 def partition_data(x, y, ids):
     xs, ys, idss = [], [], []
     for i in range(4):
@@ -63,6 +64,7 @@ def sigmoid(t):
     return 1 / (1 + np.exp(-t))
 
 
+# This function performs the feature processing by filling the missing values, standarzation, and feature expansion
 def process_features(x, max_degree=6):
     # fill first column
     x = fill_missing(x, col_idx=0, func=np.median)
@@ -105,6 +107,7 @@ def process_features(x, max_degree=6):
 #     return x_transformed
 
 
+# This function removes the outliers that are more than 1.5 * IQR away from the first and third quartiles
 def remove_outliers(x):
     out = x.copy()
     q75, q25 = np.percentile(x, [75, 25])
@@ -118,6 +121,7 @@ def remove_outliers(x):
     return out
 
 
+# This function gives k set of indices for cross validation
 def build_k_indices(N, k_fold):
     num_row = N
     interval = int(num_row / k_fold)
@@ -126,8 +130,8 @@ def build_k_indices(N, k_fold):
     return np.array(k_indices)
 
 
+# This function performs cross validation and returns the best hyper-parameters and best loss
 def do_cross_validation(x, y, nfolds=4):
-    # lambdas = np.linspace(0.00005, 0.00015, 11)
     lambdas = np.logspace(-5, -3, 70)
     accs = []
     losses = []
@@ -145,8 +149,6 @@ def do_cross_validation(x, y, nfolds=4):
             x_train_k = np.delete(x, k_indices[k], axis=0)
             y_train_k = np.delete(y, k_indices[k], axis=0)
 
-            # x_train_k = process_features(x_train_k)
-            # x_validation_k = process_features(x_validation_k)
             x_train_k, x_validation_k = add_bias(x_train_k), add_bias(x_validation_k)
 
             w, loss = ridge_regression(y_train_k, x_train_k, lambda_)
