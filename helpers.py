@@ -68,10 +68,11 @@ def process_features(x, max_degree=6):
     x = fill_missing(x, col_idx=0, func=np.median)
 
     # remove other meaningless columns
-    var = np.var(x, axis=0)
-    removing_cols = np.where(var == 0)[0]
+    std = np.std(x, axis=0)
+    removing_cols = np.where(std == 0)[0]
     x = np.delete(x, removing_cols, 1)
 
+    # remove potential outliers in the features
     x = remove_outliers(x)
 
     # normalize
@@ -79,15 +80,29 @@ def process_features(x, max_degree=6):
     x /= np.std(x, axis=0)
 
     # add poly
-    # x_copy = x.copy()
-    # for k in range(x_copy.shape[1]):
-    #     for j in range(k, x_copy.shape[1]):
-    #         new_col = x_copy[:, k] * x_copy[:, j]
-    #         new_col = np.reshape(new_col, (x.shape[0], -1))
-    #         x = np.concatenate([x, new_col], 1)
-    # x = np.concatenate([x, np.sin(x_copy), np.cos(x_copy)], 1)
-    # x = np.concatenate([x, x_copy ** 3, x_copy ** 4, x_copy ** 5, x_copy ** 6], 1)
+    x_copy = x.copy()
+    for k in range(x_copy.shape[1]):
+        for j in range(k, x_copy.shape[1]):
+            new_col = x_copy[:, k] * x_copy[:, j]
+            new_col = np.reshape(new_col, (x.shape[0], -1))
+            x = np.concatenate([x, new_col], 1)
+    x = np.concatenate([x, np.sin(x_copy), np.cos(x_copy)], 1)
+    x = np.concatenate([x, x_copy ** 3, x_copy ** 4, x_copy ** 5, x_copy ** 6], 1)
     return x
+
+
+def pca_fit(x_raw, n=10):
+    cov = np.cov(x_raw.T)
+    eig_values, eig_vectors = np.linalg.eig(cov)
+
+    idx = eig_values.argsort()[::-1]
+    eig_values = eig_values[idx]
+    eig_vectors = eig_vectors[:, idx]
+
+    return eig_vectors[:, :n], eig_values[:n]
+def pca_transform(x_raw, eig_vectors, n=10):
+    x_transformed = x_raw.dot(eig_vectors)
+    return x_transformed
 
 
 def remove_outliers(x):
@@ -112,7 +127,7 @@ def build_k_indices(N, k_fold):
 
 
 def do_cross_validation(x, y, nfolds=4):
-    lambdas = np.logspace(-10, -5, 40)
+    lambdas = np.linspace(0.00005, 0.00015, 11)
 
     accs = []
     losses = []
@@ -130,6 +145,8 @@ def do_cross_validation(x, y, nfolds=4):
             x_train_k = np.delete(x, k_indices[k], axis=0)
             y_train_k = np.delete(y, k_indices[k], axis=0)
 
+            # x_train_k = process_features(x_train_k)
+            # x_validation_k = process_features(x_validation_k)
             x_train_k, x_validation_k = add_bias(x_train_k), add_bias(x_validation_k)
 
             w, loss = ridge_regression(y_train_k, x_train_k, lambda_)
@@ -145,3 +162,17 @@ def do_cross_validation(x, y, nfolds=4):
     best_lambda = lambdas[idx]
 
     return best_lambda, best_loss
+
+
+# This code is partially taken from https://stackoverflow.com/questions/64860091/computing-macro-average-f1-score-using-numpy-pythonwithout-using-scikit-learn
+def f1(actual, predicted):
+    """ A helper function to calculate f1-score for the given `label` """
+    # F1 = 2 * (precision * recall) / (precision + recall)
+    tp = np.sum((actual == 1) & (predicted == 1))
+    fp = np.sum((actual == -1) & (predicted == 1))
+    fn = np.sum((predicted == -1) & (actual == 1))
+
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f1 = 2 * (precision * recall) / (precision + recall)
+    return f1
