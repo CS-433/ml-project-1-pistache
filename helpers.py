@@ -1,8 +1,17 @@
 """Some helper functions for project 1."""
 import csv
 import numpy as np
-from implementations import mean_squared_error_gd, mean_squared_error_sgd, least_squares, ridge_regression, \
-    logistic_regression, reg_logistic_regression, predict_simple, predict_logistic, penalized_logistic_regression
+from implementations import (
+    mean_squared_error_gd,
+    mean_squared_error_sgd,
+    least_squares,
+    ridge_regression,
+    logistic_regression,
+    reg_logistic_regression,
+    predict_simple,
+    predict_logistic,
+    penalized_logistic_regression,
+)
 
 
 def load_csv_data(data_path, sub_sample=False):
@@ -45,6 +54,7 @@ def fill_missing(x, col_idx, func):
     replace_val = func(x[x[:, col_idx] != -999, col_idx])
     x[x[:, col_idx] == -999, col_idx] = replace_val
     return x
+
 
 # This function partitions the data based on the value of PIR_jet_num
 def partition_data(x, y, ids):
@@ -89,7 +99,7 @@ def process_features(x, max_degree=6):
             new_col = np.reshape(new_col, (x.shape[0], -1))
             x = np.concatenate([x, new_col], 1)
     x = np.concatenate([x, np.sin(x_copy), np.cos(x_copy)], 1)
-    x = np.concatenate([x, x_copy ** 3, x_copy ** 4, x_copy ** 5, x_copy ** 6], 1)
+    x = np.concatenate([x, x_copy**3, x_copy**4, x_copy**5, x_copy**6], 1)
     return x
 
 
@@ -126,7 +136,7 @@ def build_k_indices(N, k_fold):
     num_row = N
     interval = int(num_row / k_fold)
     indices = np.random.permutation(num_row)
-    k_indices = [indices[k * interval: (k + 1) * interval] for k in range(k_fold)]
+    k_indices = [indices[k * interval : (k + 1) * interval] for k in range(k_fold)]
     return np.array(k_indices)
 
 
@@ -153,7 +163,9 @@ def do_cross_validation(x, y, nfolds=4):
 
             w, loss = ridge_regression(y_train_k, x_train_k, lambda_)
 
-            validation_accuracy_k.append((predict_simple(x_validation_k, w) == y_validation_k).mean())
+            validation_accuracy_k.append(
+                (predict_simple(x_validation_k, w) == y_validation_k).mean()
+            )
             validation_loss_k.append(loss)
 
         accs.append(np.mean(validation_accuracy_k))
@@ -168,7 +180,7 @@ def do_cross_validation(x, y, nfolds=4):
 
 # This code is partially taken from https://stackoverflow.com/questions/64860091/computing-macro-average-f1-score-using-numpy-pythonwithout-using-scikit-learn
 def f1(actual, predicted):
-    """ A helper function to calculate f1-score for the given `label` """
+    """A helper function to calculate f1-score for the given `label`"""
     # F1 = 2 * (precision * recall) / (precision + recall)
     tp = np.sum((actual == 1) & (predicted == 1))
     fp = np.sum((actual == -1) & (predicted == 1))
