@@ -199,7 +199,14 @@ def do_validation_for_logistic(x, y, nfolds=4):
 
             x_train_k, x_validation_k = add_bias(x_train_k), add_bias(x_validation_k)
 
-            w, loss = reg_logistic_regression(y_train_k, x_train_k, lambda_, np.random.random(x_train_k.shape[1]), 5000, 0.001)
+            w, loss = reg_logistic_regression(
+                y_train_k,
+                x_train_k,
+                lambda_,
+                np.random.random(x_train_k.shape[1]),
+                5000,
+                0.001,
+            )
 
             validation_accuracy_k.append(
                 (predict_logistic(x_validation_k, w) == y_validation_k).mean()
@@ -214,6 +221,7 @@ def do_validation_for_logistic(x, y, nfolds=4):
     best_lambda = lambdas[idx]
 
     return best_lambda, best_loss
+
 
 # This code is partially taken from https://stackoverflow.com/questions/64860091/computing-macro-average-f1-score-using-numpy-pythonwithout-using-scikit-learn
 def f1(actual, predicted):
