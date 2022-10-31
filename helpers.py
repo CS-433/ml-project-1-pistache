@@ -178,6 +178,43 @@ def do_cross_validation(x, y, nfolds=4):
     return best_lambda, best_loss
 
 
+# This function performs validation and returns the best lambda and best loss
+def do_validation_for_logistic(x, y, nfolds=4):
+    lambdas = [0.00001, 0.00002, 0.0005, 0.001]
+    accs = []
+    losses = []
+    for lambda_ in lambdas:
+        N = x.shape[0]
+
+        k_indices = build_k_indices(N, nfolds)
+
+        validation_accuracy_k = []
+        validation_loss_k = []
+
+        for k in range(1):
+            x_validation_k = x[k_indices[k]]
+            y_validation_k = y[k_indices[k]]
+            x_train_k = np.delete(x, k_indices[k], axis=0)
+            y_train_k = np.delete(y, k_indices[k], axis=0)
+
+            x_train_k, x_validation_k = add_bias(x_train_k), add_bias(x_validation_k)
+
+            w, loss = reg_logistic_regression(y_train_k, x_train_k, lambda_, np.random.random(x_train_k.shape[1]), 5000, 0.001)
+
+            validation_accuracy_k.append(
+                (predict_logistic(x_validation_k, w) == y_validation_k).mean()
+            )
+            validation_loss_k.append(loss)
+
+        accs.append(np.mean(validation_accuracy_k))
+        losses.append(np.mean(validation_loss_k))
+    print(lambdas, accs)
+    idx = np.argmin(losses)
+    best_loss = losses[idx]
+    best_lambda = lambdas[idx]
+
+    return best_lambda, best_loss
+
 # This code is partially taken from https://stackoverflow.com/questions/64860091/computing-macro-average-f1-score-using-numpy-pythonwithout-using-scikit-learn
 def f1(actual, predicted):
     """A helper function to calculate f1-score for the given `label`"""

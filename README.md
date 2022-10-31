@@ -32,6 +32,9 @@ mentioned above.
 - `run.ipynb`: This notebook contains the implementation of the whole 
 classification pipeline using the best method (Ridge Regression) and generates the final predictions
 on the test dataset.
+- `logistic_regression.ipynb`: This notebook contains the implementation of the whole 
+classification pipeline using the best method (Logistic Regression) and generates the final predictions
+on the test dataset. (non-optimal)
 
 #### Necessary Packages
 You need to install `numpy` and `matplotlib` libraries before using this repository.

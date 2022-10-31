@@ -389,6 +389,6 @@ def predict_simple(tx, w):
 
 def predict_logistic(tx, w):
     scores = sigmoid(tx @ w)
-    labels = np.zeros_like(scores)
+    labels = np.ones_like(scores) * -1
     labels[scores > 0.5] = 1
     return labels
