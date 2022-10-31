@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def compute_gradient(y, tx, w):
     """Computes the gradient at w.
 
@@ -30,7 +31,7 @@ def compute_loss(y, tx, w):
         the value of the loss (a scalar), corresponding to the input parameters w.
     """
     e = y - tx.dot(w)
-    loss = 0.5 * (e ** 2).mean()
+    loss = 0.5 * (e**2).mean()
     return loss
 
 
@@ -88,7 +89,7 @@ def sigmoid(t):
     sigmoid(np.array([0.1, 0.1]))
     array([0.52497919, 0.52497919])
     """
-    return 1/(1+np.exp(-t))
+    return 1 / (1 + np.exp(-t))
 
 
 def calculate_loss(y, tx, w):
@@ -112,7 +113,7 @@ def calculate_loss(y, tx, w):
     assert tx.shape[1] == w.shape[0]
 
     xw = tx @ w
-    elementwise_loss = np.log(1+np.exp(xw)) - y*xw
+    elementwise_loss = np.log(1 + np.exp(xw)) - y * xw
     return elementwise_loss.mean()
 
 
@@ -170,7 +171,7 @@ def learning_by_gradient_descent(y, tx, w, gamma):
            [0.24828716]])
     """
     grad = calculate_gradient(y, tx, w)
-    updated_w = w - gamma*grad
+    updated_w = w - gamma * grad
     loss = calculate_loss(y, tx, w)
     return loss, updated_w
 
@@ -201,7 +202,7 @@ def penalized_logistic_regression(y, tx, w, lambda_):
            [ 0.57712843]])
     """
     pen_loss = calculate_loss(y, tx, w)
-    pen_grad = calculate_gradient(y, tx, w) + 2 * lambda_*w
+    pen_grad = calculate_gradient(y, tx, w) + 2 * lambda_ * w
     return pen_loss, pen_grad
 
 
@@ -234,8 +235,11 @@ def mean_squared_error_gd(y, tx, initial_w, max_iters, gamma):
         # store w and loss
         ws.append(w)
         losses.append(loss)
-        print("GD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
-            bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+        print(
+            "GD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
+                bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]
+            )
+        )
 
     return ws[-1], losses[-1]
 
@@ -272,8 +276,11 @@ def mean_squared_error_sgd(y, tx, initial_w, max_iters, gamma):
             ws.append(w)
             losses.append(loss)
 
-            print("SGD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
-                bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]))
+            print(
+                "SGD iter. {bi}/{ti}: loss={l}, w0={w0}, w1={w1}".format(
+                    bi=n_iter, ti=max_iters - 1, l=loss, w0=w[0], w1=w[1]
+                )
+            )
     return ws[-1], losses[-1]
 
 
@@ -295,7 +302,7 @@ def least_squares(y, tx):
 
     w_star = np.linalg.solve(tx.T.dot(tx), tx.T.dot(y))
     e = y - tx.dot(w_star)
-    loss_star = 0.5 * (e ** 2).mean()
+    loss_star = 0.5 * (e**2).mean()
     return w_star, loss_star
 
 
@@ -316,7 +323,9 @@ def ridge_regression(y, tx, lambda_):
     array([0.03947092, 0.00319628])
     """
     N = tx.shape[0]
-    w_star = np.linalg.solve(tx.T.dot(tx) + lambda_ * 2 * N * (np.eye(tx.shape[1])), tx.T.dot(y))
+    w_star = np.linalg.solve(
+        tx.T.dot(tx) + lambda_ * 2 * N * (np.eye(tx.shape[1])), tx.T.dot(y)
+    )
     loss_star = np.linalg.norm((y - tx @ w_star), 2) ** 2 / (2 * N)
     return w_star, loss_star
 
@@ -364,7 +373,9 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     loss = calculate_loss(y, tx, w)
     return w, loss
 
+
 # ================================================================================
+
 
 def predict_simple(tx, w):
     scores = tx @ w
